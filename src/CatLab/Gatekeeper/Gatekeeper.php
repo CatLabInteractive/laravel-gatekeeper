@@ -3,7 +3,6 @@
 namespace CatLab\Gatekeeper;
 
 use CatLab\Gatekeeper\Contracts\Identity;
-use CatLab\Gatekeeper\Exceptions\IdentityNotDefined;
 use CatLab\Gatekeeper\Contracts\Policy;
 use CatLab\Gatekeeper\Models\GlobalPolicy;
 use CatLab\Gatekeeper\Models\ObjectPolicyResolver;
@@ -67,6 +66,8 @@ class Gatekeeper implements Contracts\Gatekeeper
                 '$identity must be either ' . Identity::class . ' or a callback that returns ' . Identity::class . '.'
             );
         }
+
+        return $this;
     }
 
     /**
@@ -77,6 +78,7 @@ class Gatekeeper implements Contracts\Gatekeeper
     public function addPolicy($className, $policy)
     {
         $this->policies[$className] = $policy;
+        return $this;
     }
 
     /**
@@ -111,7 +113,7 @@ class Gatekeeper implements Contracts\Gatekeeper
     /**
      * @param string
      * @return bool
-     * @throws IdentityNotDefined
+     * @throws \CatLab\Gatekeeper\Exceptions\IdentityNotDefined
      */
     public function check($ability)
     {
@@ -150,7 +152,7 @@ class Gatekeeper implements Contracts\Gatekeeper
      */
     public function has($ability)
     {
-        $this->globalPolicy->has($ability);
+        return $this->globalPolicy->has($ability);
     }
 
     /**
@@ -165,7 +167,7 @@ class Gatekeeper implements Contracts\Gatekeeper
     }
 
     /**
-     * @throws IdentityNotDefined
+     * @throws \CatLab\Gatekeeper\Exceptions\IdentityNotDefined
      * @return Identity
      */
     public function getIdentity()
@@ -180,7 +182,8 @@ class Gatekeeper implements Contracts\Gatekeeper
         }
 
         if (!isset($this->identity)) {
-            throw new IdentityNotDefined('You must define an identity before using Gatekeeper');
+            throw new \CatLab\Gatekeeper\Exceptions\IdentityNotDefined
+                ('You must define an identity before using Gatekeeper');
         }
 
         return $this->identity;
@@ -188,7 +191,7 @@ class Gatekeeper implements Contracts\Gatekeeper
 
     /**
      * @param string $ability
-     * @return Contracts\Policy
+     * @return Contracts\Policy[]
      */
     private function resolvePolicies($ability)
     {
